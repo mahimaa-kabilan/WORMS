@@ -1,0 +1,153 @@
+-- =========================================
+-- CREATE DATABASE
+-- =========================================
+CREATE DATABASE SupplyChainDB;
+USE SupplyChainDB;
+
+-- =========================================
+-- TABLE: CUSTOMERS
+-- =========================================
+CREATE TABLE Customers (
+    customerID INT PRIMARY KEY AUTO_INCREMENT,
+    firstname VARCHAR(50),
+    lastname VARCHAR(50),
+    phone VARCHAR(10),
+    email VARCHAR(100),
+    doorno VARCHAR(10),
+    street VARCHAR(50),
+    district VARCHAR(50),
+    state VARCHAR(50),
+    pin INT
+);
+
+-- =========================================
+-- TABLE: SUPPLIER
+-- =========================================
+CREATE TABLE Supplier (
+    supplierID INT PRIMARY KEY AUTO_INCREMENT,
+    firstname VARCHAR(50),
+    lastname VARCHAR(50),
+    phone VARCHAR(10),
+    email VARCHAR(100),
+    doorno VARCHAR(10),
+    street VARCHAR(50),
+    district VARCHAR(50),
+    state VARCHAR(50),
+    pin INT
+);
+
+-- =========================================
+-- TABLE: PRODUCT
+-- =========================================
+CREATE TABLE Product (
+    productID INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50),
+    description VARCHAR(225),
+    unitPrice DECIMAL(10,2),
+    image_url VARCHAR(225)
+);
+
+-- =========================================
+-- TABLE: PURCHASE ORDER
+-- =========================================
+CREATE TABLE PurchaseOrder (
+    purchaseOrderID INT PRIMARY KEY AUTO_INCREMENT,
+    productID INT,
+    supplierID INT,
+    orderDate DATE,
+    totalAmount DECIMAL(10,2),
+    quantity INT,
+    status VARCHAR(50),
+    FOREIGN KEY (productID) REFERENCES Product(productID),
+    FOREIGN KEY (supplierID) REFERENCES Supplier(supplierID)
+);
+
+-- =========================================
+-- TABLE: WAREHOUSE
+-- =========================================
+CREATE TABLE Warehouse (
+    warehouseID INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50),
+    location VARCHAR(50),
+    capacity INT
+);
+
+-- =========================================
+-- TABLE: INVENTORY
+-- =========================================
+CREATE TABLE Inventory (
+    productID INT,
+    warehouseID INT,
+    quantity INT,
+    lastUpdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (productID, warehouseID),
+    FOREIGN KEY (productID) REFERENCES Product(productID),
+    FOREIGN KEY (warehouseID) REFERENCES Warehouse(warehouseID)
+);
+
+-- =========================================
+-- TABLE: ORDERS
+-- =========================================
+CREATE TABLE Orders (
+    orderID INT PRIMARY KEY AUTO_INCREMENT,
+    customerID INT,
+    orderDate DATE,
+    deliveryDate DATE,
+    totalAmount FLOAT,
+    status VARCHAR(50),
+    FOREIGN KEY (customerID) REFERENCES Customers(customerID)
+);
+
+-- =========================================
+-- TABLE: ORDER LINE
+-- =========================================
+CREATE TABLE OrderLine (
+    orderID INT,
+    productID INT,
+    quantity INT,
+    totalPrice DECIMAL(10,2),
+    PRIMARY KEY (orderID, productID),
+    FOREIGN KEY (orderID) REFERENCES Orders(orderID),
+    FOREIGN KEY (productID) REFERENCES Product(productID)
+);
+
+-- =========================================
+-- TABLE: SHIPMENT
+-- =========================================
+CREATE TABLE Shipment (
+    shipmentID INT PRIMARY KEY AUTO_INCREMENT,
+    orderID INT,
+    warehouseID INT,
+    shipmentDate DATE,
+    trackingNumber VARCHAR(20),
+    status VARCHAR(20),
+    FOREIGN KEY (orderID) REFERENCES Orders(orderID),
+    FOREIGN KEY (warehouseID) REFERENCES Warehouse(warehouseID)
+);
+
+-- =========================================
+-- TABLE: USERS (Authentication)
+-- =========================================
+CREATE TABLE Users (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role ENUM('customer','supplier','warehouse') NOT NULL,
+  entityId INT NOT NULL,  -- maps to corresponding ID in Customers/Supplier/Warehouse
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- =========================================
+-- TABLE: CART
+-- =========================================
+CREATE TABLE Cart (
+    cartID INT PRIMARY KEY AUTO_INCREMENT,
+    customerID INT NOT NULL,
+    productID INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    addedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customerID) REFERENCES Customers(customerID),
+    FOREIGN KEY (productID) REFERENCES Product(productID)
+);
+

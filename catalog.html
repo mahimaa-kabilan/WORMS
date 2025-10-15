@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Catalog | WORMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== General ===== */
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      color: #f1f1f1;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, #0a0a0f 0%, #12121a 40%, #1e1e2f 100%);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ===== Neon Blobs ===== */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.3;
+      animation: float 10s infinite ease-in-out alternate;
+    }
+
+    .blob1 { width: 400px; height: 400px; background: #6a5acd; top: -100px; left: -100px; animation-delay: 0s; }
+    .blob2 { width: 350px; height: 350px; background: #00bcd4; bottom: -120px; right: -80px; animation-delay: 2s; }
+    .blob3 { width: 300px; height: 300px; background: #ff4081; top: 40%; left: 65%; animation-delay: 4s; }
+
+    @keyframes float {
+      from { transform: translateY(0px) scale(1); }
+      to { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      padding: 1rem 2rem;
+      z-index: 10;
+    }
+
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 600;
+      background: linear-gradient(90deg, #9c27b0, #03a9f4, #e91e63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-btn {
+      margin-left: 10px;
+      border: none;
+      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      background: linear-gradient(135deg, #03a9f4, #9c27b0);
+      color: white;
+      transition: 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .nav-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(156,39,176,0.8);
+    }
+
+    /* ===== Catalog ===== */
+    .container {
+      position: relative;
+      z-index: 5;
+      padding: 100px 2rem 50px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      background: linear-gradient(90deg, #9c27b0, #03a9f4, #e91e63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 600;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 20px rgba(0,255,255,0.2);
+    }
+
+    .card-img-top {
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .card-title {
+      font-size: 1rem; /* Reduced size */
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-text {
+      color: #cfcfcf;
+      font-size: 0.9rem;
+    }
+
+    .btn-add {
+      background: linear-gradient(135deg, #03a9f4, #9c27b0);
+      border: none;
+      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      color: white;
+      transition: 0.3s ease;
+    }
+
+    .btn-add:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(156,39,176,0.8);
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Background blobs -->
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('home') }}">WORMS</a>
+      <div class="ms-auto">
+        <a href="{{ url_for('customer_signup') }}"><button class="nav-btn">📝 Sign Up</button></a>
+        <a href="{{ url_for('customer_login') }}"><button class="nav-btn">🔑 Login</button></a>
+        <a href="{{ url_for('view_cart') }}"><button class="nav-btn">🛒 Cart</button></a>
+        <a href="{{ url_for('view_orders') }}"><button class="nav-btn">📦 Orders</button></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Catalog Section -->
+  <div class="container">
+    <h2>🛍️ Product Catalog</h2>
+    <div class="row g-4">
+      <!-- Product 1 -->
+      <div class="col-md-4 col-sm-6">
+        <div class="card">
+          <img src="https://via.placeholder.com/250x180/6a5acd/ffffff?text=Perfume" class="card-img-top" alt="Perfume">
+          <div class="card-body text-center">
+            <h5 class="card-title">🌸 Lavender Perfume</h5>
+            <p class="card-text">Price: ₹799</p>
+            <a href="#" class="btn btn-add">➕ Add to Cart</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 2 -->
+      <div class="col-md-4 col-sm-6">
+        <div class="card">
+          <img src="https://via.placeholder.com/250x180/03a9f4/ffffff?text=Soap" class="card-img-top" alt="Soap">
+          <div class="card-body text-center">
+            <h5 class="card-title">🧼 Aloe Vera Soap</h5>
+            <p class="card-text">Price: ₹149</p>
+            <a href="#" class="btn btn-add">➕ Add to Cart</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 3 -->
+      <div class="col-md-4 col-sm-6">
+        <div class="card">
+          <img src="https://via.placeholder.com/250x180/9c27b0/ffffff?text=Shampoo" class="card-img-top" alt="Shampoo">
+          <div class="card-body text-center">
+            <h5 class="card-title">🧴 Herbal Shampoo</h5>
+            <p class="card-text">Price: ₹299</p>
+            <a href="#" class="btn btn-add">➕ Add to Cart</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 4 -->
+      <div class="col-md-4 col-sm-6">
+        <div class="card">
+          <img src="https://via.placeholder.com/250x180/ff4081/ffffff?text=Face+Cream" class="card-img-top" alt="Face Cream">
+          <div class="card-body text-center">
+            <h5 class="card-title">💆‍♀️ Face Cream</h5>
+            <p class="card-text">Price: ₹499</p>
+            <a href="#" class="btn btn-add">➕ Add to Cart</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 5 -->
+      <div class="col-md-4 col-sm-6">
+        <div class="card">
+          <img src="https://via.placeholder.com/250x180/00bcd4/ffffff?text=Body+Lotion" class="card-img-top" alt="Body Lotion">
+          <div class="card-body text-center">
+            <h5 class="card-title">🧴 Body Lotion</h5>
+            <p class="card-text">Price: ₹599</p>
+            <a href="#" class="btn btn-add">➕ Add to Cart</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product 6 -->
+      <div class="col-md-4 col-sm-6">
+        <div class="card">
+          <img src="https://via.placeholder.com/250x180/8e24aa/ffffff?text=Hair+Oil" class="card-img-top" alt="Hair Oil">
+          <div class="card-body text-center">
+            <h5 class="card-title">💆‍♂️ Hair Oil</h5>
+            <p class="card-text">Price: ₹349</p>
+            <a href="#" class="btn btn-add">➕ Add to Cart</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

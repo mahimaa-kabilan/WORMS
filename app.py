@@ -198,30 +198,71 @@ def supplier_dashboard():
 # ==========================================================
 # SUPPLIER FEATURES
 # ==========================================================
+import os
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-@app.route('/supplier/add_product', methods=['GET', 'POST'])
-@login_required(role='supplier')
+\
+# ===========================
+# ROUTE: ADD PRODUCT (GET + POST)
+# ===========================
+@app.route('/add_product', methods=['GET', 'POST'])
 def add_product():
+    conn = get_db_connection()
+    cursor=conn.cursor(dictionary=True)
+    # Fetch available warehouses for dropdown
+    cursor.execute("SELECT warehouseID, name FROM Warehouse")
+    warehouses = cursor.fetchall()
+
     if request.method == 'POST':
-        data = request.form
-        image = request.files.get('image')
+        name = request.form['name']
+        description = request.form['description']
+        unitPrice = request.form['unitPrice']
+        quantity = request.form['quantity']
+        warehouse_id = request.form['warehouse_id']
+        image = request.files['image']
 
-        image_url = None
-        if image:
-            image.save(f'static/uploads/{image.filename}')
-            image_url = f'/static/uploads/{image.filename}'
+        image_path = None
+        if image and image.filename != '':
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
+            image.save(image_path)
+            image_path = image_path.replace('\\', '/')
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO Product (name, description, unitPrice, image_url)
-            VALUES (%s, %s, %s, %s)
-        """, (data['name'], data['description'], data['unitPrice'], image_url))
+        # Insert product
+        insert_product = """
+        INSERT INTO Product (name, description, unitPrice, image_url)
+        VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(insert_product, (name, description, unitPrice, image_path))
         conn.commit()
-        cursor.close()
-        conn.close()
-        return redirect(url_for('supplier_dashboard'))
-    return render_template('supplier/add_product.html')
+
+        # Get product ID
+        product_id = cursor.lastrowid
+
+        # Check if inventory entry already exists
+        cursor.execute("""
+            SELECT * FROM Inventory WHERE productID = %s AND warehouseID = %s
+        """, (product_id, warehouse_id))
+        existing = cursor.fetchone()
+
+        if existing:
+            # Update existing inventory quantity
+            cursor.execute("""
+                UPDATE Inventory
+                SET quantity = quantity + %s
+                WHERE productID = %s AND warehouseID = %s
+            """, (quantity, product_id, warehouse_id))
+        else:
+            # Insert new inventory record
+            cursor.execute("""
+                INSERT INTO Inventory (productID, warehouseID, quantity)
+                VALUES (%s, %s, %s)
+            """, (product_id, warehouse_id, quantity))
+        conn.commit()
+        return redirect(url_for('add_product'))
+
+    return render_template('supplier/add_product.html', warehouses=warehouses)
 
 
 @app.route('/supplier/stock_view')

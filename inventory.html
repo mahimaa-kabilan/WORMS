@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WORMS | Inventory</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== General ===== */
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, #1b1b29 0%, #24243a 40%, #302b63 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ===== Background Blobs ===== */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.25;
+      animation: float 10s infinite ease-in-out alternate;
+      z-index: 0;
+    }
+    .blob1 { width: 350px; height: 350px; background: #6a5acd; top: -80px; left: -80px; animation-delay: 0s; }
+    .blob2 { width: 300px; height: 300px; background: #00bcd4; bottom: -80px; right: -60px; animation-delay: 2s; }
+    .blob3 { width: 250px; height: 250px; background: #ff4081; top: 60%; left: 70%; animation-delay: 4s; }
+
+    @keyframes float {
+      from { transform: translateY(0px) scale(1); }
+      to { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* ===== Page Header ===== */
+    .inventory-header {
+      text-align: center;
+      padding: 60px 20px 30px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .inventory-header h1 {
+      font-size: 2.8rem;
+      font-weight: 600;
+      background: linear-gradient(90deg, #03a9f4, #9c27b0, #ff4081);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(255,255,255,0.15);
+    }
+
+    .inventory-header p {
+      color: #bfbfd6;
+      margin-top: 10px;
+      font-size: 1.1rem;
+    }
+
+    /* ===== Search Bar ===== */
+    .search-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .search-bar {
+      width: 300px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 30px;
+      padding: 10px 20px;
+      outline: none;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .search-bar:focus {
+      width: 400px;
+      border-color: #03a9f4;
+      box-shadow: 0 0 20px rgba(3,169,244,0.4);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 15%;
+      font-size: 1.3rem;
+      color: #03a9f4;
+      pointer-events: none;
+    }
+
+    /* ===== Table Section ===== */
+    .inventory-table {
+      z-index: 2;
+      position: relative;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      margin: 30px auto;
+      width: 90%;
+      max-width: 1100px;
+      padding: 20px 30px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+      transition: all 0.3s ease-in-out;
+    }
+
+    table {
+      color: #fff;
+      border-collapse: separate;
+      border-spacing: 0 10px;
+      width: 100%;
+    }
+
+    thead {
+      background: linear-gradient(90deg, #03a9f4 0%, #9c27b0 100%);
+      border-radius: 12px;
+    }
+
+    thead th {
+      color: #fff;
+      font-weight: 600;
+      text-align: center;
+      padding: 15px;
+    }
+
+    tbody tr {
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      transition: all 0.25s ease;
+    }
+
+    tbody tr:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-3px);
+    }
+
+    tbody td {
+      text-align: center;
+      padding: 12px;
+      color: #e3e3e3;
+      font-size: 0.95rem;
+    }
+
+    .highlight {
+      background-color: rgba(3,169,244,0.25) !important;
+      animation: pulse 0.6s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 rgba(3,169,244,0); }
+      50% { box-shadow: 0 0 10px rgba(3,169,244,0.8); }
+      100% { box-shadow: 0 0 0 rgba(3,169,244,0); }
+    }
+
+    .status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .status.in-stock { background-color: rgba(0, 200, 83, 0.2); color: #00c853; }
+    .status.low-stock { background-color: rgba(255, 160, 0, 0.2); color: #ffa000; }
+    .status.out-of-stock { background-color: rgba(255, 23, 68, 0.2); color: #ff1744; }
+
+    /* ===== Buttons ===== */
+    .btn-add {
+      display: inline-block;
+      background: linear-gradient(90deg, #03a9f4, #9c27b0);
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      padding: 10px 25px;
+      font-weight: 600;
+      box-shadow: 0 0 15px rgba(156,39,176,0.4);
+      transition: all 0.3s ease;
+    }
+    .btn-add:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(3,169,244,0.6);
+    }
+
+    .action-icons {
+      font-size: 1.2rem;
+      cursor: pointer;
+      margin: 0 8px;
+      transition: color 0.2s;
+    }
+    .action-icons:hover { color: #03a9f4; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      table { font-size: 0.8rem; }
+      .inventory-header h1 { font-size: 2rem; }
+      .search-bar { width: 90%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Blobs -->
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+
+  <!-- Header -->
+  <div class="inventory-header">
+    <h1>Inventory Management</h1>
+    <p>View, search, and manage product stock levels</p>
+
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Search by name, ID, or category">
+    </div>
+
+    <button class="btn-add mt-3" id="addProductBtn">+ Add Product</button>
+  </div>
+
+  <!-- Inventory Table -->
+  <div class="inventory-table">
+    <table id="inventoryTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Product</th>
+          <th>Category</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>001</td>
+          <td>Steel Rod</td>
+          <td>Construction</td>
+          <td>85</td>
+          <td><span class="status in-stock">In Stock</span></td>
+          <td>
+            <span class="action-icons">✏️</span>
+            <span class="action-icons">🗑️</span>
+          </td>
+        </tr>
+        <tr>
+          <td>002</td>
+          <td>Wood Plank</td>
+          <td>Material</td>
+          <td>15</td>
+          <td><span class="status low-stock">Low Stock</span></td>
+          <td>
+            <span class="action-icons">✏️</span>
+            <span class="action-icons">🗑️</span>
+          </td>
+        </tr>
+        <tr>
+          <td>003</td>
+          <td>Cement Bag</td>
+          <td>Raw Goods</td>
+          <td>0</td>
+          <td><span class="status out-of-stock">Out of Stock</span></td>
+          <td>
+            <span class="action-icons">✏️</span>
+            <span class="action-icons">🗑️</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Add Product Button
+    document.getElementById('addProductBtn').addEventListener('click', () => {
+      alert('Redirecting to Add Product Page...');
+      // Example redirect:
+      // window.location.href = "{{ url_for('add_product') }}";
+    });
+
+    // Live Search + Animation
+    const searchInput = document.getElementById('searchInput');
+    const rows = document.querySelectorAll('#inventoryTable tbody tr');
+
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.toLowerCase().trim();
+      let hasMatch = false;
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(query)) {
+          row.style.display = '';
+          row.classList.add('highlight');
+          hasMatch = true;
+          setTimeout(() => row.classList.remove('highlight'), 600);
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // Subtle shake animation when no results
+      const table = document.querySelector('.inventory-table');
+      if (!hasMatch && query) {
+        table.classList.add('shake');
+        setTimeout(() => table.classList.remove('shake'), 400);
+      }
+    });
+
+    // Shake animation for no-match feedback
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+      .shake { animation: shake 0.4s ease-in-out; }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

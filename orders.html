@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧾 Your Orders | WORMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      color: #f1f1f1;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, #0a0a0f 0%, #12121a 40%, #1e1e2f 100%);
+      overflow-x: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.3;
+      animation: float 10s infinite ease-in-out alternate;
+    }
+
+    .blob1 { width: 400px; height: 400px; background: #6a5acd; top: -100px; left: -100px; animation-delay: 0s; }
+    .blob2 { width: 350px; height: 350px; background: #00bcd4; bottom: -120px; right: -80px; animation-delay: 2s; }
+    .blob3 { width: 300px; height: 300px; background: #ff4081; top: 40%; left: 65%; animation-delay: 4s; }
+
+    @keyframes float {
+      from { transform: translateY(0px) scale(1); }
+      to { transform: translateY(-30px) scale(1.05); }
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #9c27b0, #03a9f4, #e91e63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    }
+
+    .orders-table {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      width: 100%;
+      max-width: 900px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 5;
+    }
+
+    table {
+      width: 100%;
+      color: white;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    th {
+      background-color: rgba(255,255,255,0.15);
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    .btn-back {
+      margin-top: 25px;
+      background: linear-gradient(135deg, #03a9f4, #9c27b0);
+      border: none;
+      color: white;
+      padding: 10px 25px;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .btn-back:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(156,39,176,0.8);
+    }
+
+    .status { font-weight: 600; }
+    .status.pending { color: #ffeb3b; }
+    .status.completed { color: #4caf50; }
+    .status.cancelled { color: #f44336; }
+  </style>
+</head>
+<body>
+  <!-- Floating background blobs -->
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+
+  <!-- Orders Table -->
+  <div class="orders-table">
+    <h1>📦 Your Orders</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Product</th>
+          <th>Date</th>
+          <th>Quantity</th>
+          <th>Total (₹)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td>{{ order.id }}</td>
+          <td>{{ order.product_name }}</td>
+          <td>{{ order.date }}</td>
+          <td>{{ order.quantity }}</td>
+          <td>₹{{ order.total }}</td>
+          <td class="status 
+            {% if order.status == 'Pending' %}pending{% elif order.status == 'Completed' %}completed{% elif order.status == 'Cancelled' %}cancelled{% endif %}">
+            {{ order.status }}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted">No orders found 🥺</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <a href="{{ url_for('catalog') }}" class="btn-back">🛍️ Back to Catalog</a>
+  </div>
+</body>
+</html>
+

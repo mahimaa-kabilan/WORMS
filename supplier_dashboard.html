@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supplier Dashboard | WORMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, #0a0a0f 0%, #12121a 40%, #1e1e2f 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 10px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.35;
+      animation: float 10s infinite ease-in-out alternate;
+      z-index: 1;
+    }
+    .blob1 { width: 400px; height: 400px; background: #6a5acd; top: -120px; left: -80px; }
+    .blob2 { width: 350px; height: 350px; background: #00bcd4; bottom: -100px; right: -80px; }
+    .blob3 { width: 300px; height: 300px; background: #ff4081; top: 50%; left: 70%; }
+    @keyframes float {
+      from { transform: translateY(0px) scale(1); }
+      to { transform: translateY(-25px) scale(1.05); }
+    }
+
+    .dashboard-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 18px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      padding: 2rem;
+      width: 90%;
+      max-width: 900px;
+      z-index: 5;
+    }
+
+    h2 {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, #03a9f4, #9c27b0, #e91e63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .card-section {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #03a9f4, #9c27b0);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(156,39,176,0.6);
+    }
+
+    table {
+      width: 100%;
+      color: #fff;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    th {
+      color: #03a9f4;
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+
+  <div class="dashboard-card">
+    <h2>🏭 Supplier Dashboard</h2>
+    <p class="text-center mb-4">Welcome back, <strong>Supplier X</strong> 👋 — here’s an overview of your current stats!</p>
+
+    <div class="card-section">
+      <h5>📦 Recent Deliveries</h5>
+      <table class="mt-3">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Item</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>#PO1023</td><td>Organic Fertilizer</td><td>Delivered ✅</td><td>2025-10-10</td></tr>
+          <tr><td>#PO1024</td><td>Pesticide Mix</td><td>Pending ⏳</td><td>2025-10-13</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-section">
+      <h5>🧾 Upcoming Orders</h5>
+      <ul>
+        <li>Order #PO1025 – Due: 2025-10-20</li>
+        <li>Order #PO1026 – Due: 2025-10-25</li>
+      </ul>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="/purchase_orders" class="btn">View All Purchase Orders</a>
+    </div>
+  </div>
+</body>
+</html>

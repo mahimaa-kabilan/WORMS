@@ -7,7 +7,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    /* ===== General ===== */
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
@@ -24,7 +23,6 @@
       padding: 40px 20px;
     }
 
-    /* ===== Neon Blobs ===== */
     .blob {
       position: absolute;
       border-radius: 50%;
@@ -33,39 +31,15 @@
       animation: float 10s infinite ease-in-out alternate;
     }
 
-    .blob1 {
-      width: 400px;
-      height: 400px;
-      background: #6a5acd;
-      top: -100px;
-      left: -100px;
-      animation-delay: 0s;
-    }
-
-    .blob2 {
-      width: 350px;
-      height: 350px;
-      background: #00bcd4;
-      bottom: -120px;
-      right: -80px;
-      animation-delay: 2s;
-    }
-
-    .blob3 {
-      width: 300px;
-      height: 300px;
-      background: #ff4081;
-      top: 40%;
-      left: 65%;
-      animation-delay: 4s;
-    }
+    .blob1 { width: 400px; height: 400px; background: #6a5acd; top: -100px; left: -100px; animation-delay: 0s; }
+    .blob2 { width: 350px; height: 350px; background: #00bcd4; bottom: -120px; right: -80px; animation-delay: 2s; }
+    .blob3 { width: 300px; height: 300px; background: #ff4081; top: 40%; left: 65%; animation-delay: 4s; }
 
     @keyframes float {
       from { transform: translateY(0px) scale(1); }
       to { transform: translateY(-30px) scale(1.05); }
     }
 
-    /* ===== Orders Table ===== */
     h1 {
       font-size: 2rem;
       font-weight: 700;
@@ -131,11 +105,10 @@
     .status.pending { color: #ffeb3b; }
     .status.completed { color: #4caf50; }
     .status.cancelled { color: #f44336; }
-
   </style>
 </head>
 <body>
-  <!-- Background blobs -->
+  <!-- Floating background blobs -->
   <div class="blob blob1"></div>
   <div class="blob blob2"></div>
   <div class="blob blob3"></div>
@@ -155,58 +128,27 @@
         </tr>
       </thead>
       <tbody>
+        {% for order in orders %}
         <tr>
-          <td>101</td>
-          <td>💧 Moisturizer</td>
-          <td>2025-10-10</td>
-          <td>2</td>
-          <td>₹480</td>
-          <td class="status completed">Completed</td>
+          <td>{{ order.id }}</td>
+          <td>{{ order.product_name }}</td>
+          <td>{{ order.date }}</td>
+          <td>{{ order.quantity }}</td>
+          <td>₹{{ order.total }}</td>
+          <td class="status 
+            {% if order.status == 'Pending' %}pending{% elif order.status == 'Completed' %}completed{% elif order.status == 'Cancelled' %}cancelled{% endif %}">
+            {{ order.status }}
+          </td>
         </tr>
+        {% else %}
         <tr>
-          <td>102</td>
-          <td>🧼 Face Wash</td>
-          <td>2025-10-12</td>
-          <td>1</td>
-          <td>₹250</td>
-          <td class="status pending">Pending</td>
+          <td colspan="6" class="text-center text-muted">No orders found 🥺</td>
         </tr>
-        <tr>
-          <td>103</td>
-          <td>🧴 Herbal Shampoo</td>
-          <td>2025-10-13</td>
-          <td>3</td>
-          <td>₹897</td>
-          <td class="status completed">Completed</td>
-        </tr>
-        <tr>
-          <td>104</td>
-          <td>💆‍♀️ Face Cream</td>
-          <td>2025-10-14</td>
-          <td>1</td>
-          <td>₹499</td>
-          <td class="status cancelled">Cancelled</td>
-        </tr>
-        <tr>
-          <td>105</td>
-          <td>🧴 Body Lotion</td>
-          <td>2025-10-15</td>
-          <td>2</td>
-          <td>₹1198</td>
-          <td class="status pending">Pending</td>
-        </tr>
-        <tr>
-          <td>106</td>
-          <td>💆‍♂️ Hair Oil</td>
-          <td>2025-10-15</td>
-          <td>1</td>
-          <td>₹349</td>
-          <td class="status completed">Completed</td>
-        </tr>
+        {% endfor %}
       </tbody>
     </table>
 
-    <a href="catalog.html" class="btn-back">🛍️ Back to Catalog</a>
+    <a href="{{ url_for('catalog') }}" class="btn-back">🛍️ Back to Catalog</a>
   </div>
 </body>
 </html>

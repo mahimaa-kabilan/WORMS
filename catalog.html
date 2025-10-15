@@ -29,7 +29,7 @@
 
     .blob1 { width: 400px; height: 400px; background: #6a5acd; top: -100px; left: -100px; animation-delay: 0s; }
     .blob2 { width: 350px; height: 350px; background: #00bcd4; bottom: -120px; right: -80px; animation-delay: 2s; }
-    .blob3 { width: 300px; height: 300px; background: #ff4081; top: 40%; left: 65%; animation-delay: 4s; }
+    .blob3 { width: 300px; height: 300px; background: #7b1fa2; top: 40%; left: 65%; animation-delay: 4s; }
 
     @keyframes float {
       from { transform: translateY(0px) scale(1); }
@@ -109,7 +109,7 @@
     }
 
     .card-title {
-      font-size: 1rem; /* Reduced size */
+      font-size: 1rem;
       color: #fff;
       margin-bottom: 0.5rem;
     }
@@ -132,9 +132,9 @@
       transform: scale(1.05);
       box-shadow: 0 0 15px rgba(156,39,176,0.8);
     }
-
   </style>
 </head>
+
 <body>
   <!-- Background blobs -->
   <div class="blob blob1"></div>
@@ -144,7 +144,7 @@
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid">
-      <a class="navbar-brand" href="{{ url_for('home') }}">WORMS</a>
+      <a class="navbar-brand" href="{{ url_for('inventory') }}">WORMS</a>
       <div class="ms-auto">
         <a href="{{ url_for('customer_signup') }}"><button class="nav-btn">📝 Sign Up</button></a>
         <a href="{{ url_for('customer_login') }}"><button class="nav-btn">🔑 Login</button></a>
@@ -157,79 +157,30 @@
   <!-- Catalog Section -->
   <div class="container">
     <h2>🛍️ Product Catalog</h2>
+
+    {% if products %}
     <div class="row g-4">
-      <!-- Product 1 -->
+      {% for product in products %}
       <div class="col-md-4 col-sm-6">
         <div class="card">
-          <img src="https://via.placeholder.com/250x180/6a5acd/ffffff?text=Perfume" class="card-img-top" alt="Perfume">
+          <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
           <div class="card-body text-center">
-            <h5 class="card-title">🌸 Lavender Perfume</h5>
-            <p class="card-text">Price: ₹799</p>
-            <a href="#" class="btn btn-add">➕ Add to Cart</a>
+            <h5 class="card-title">{{ product.emoji }} {{ product.name }}</h5>
+            <p class="card-text">Price: ₹{{ product.price }}</p>
+            <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST">
+              <button type="submit" class="btn btn-add">➕ Add to Cart</button>
+            </form>
           </div>
         </div>
       </div>
-
-      <!-- Product 2 -->
-      <div class="col-md-4 col-sm-6">
-        <div class="card">
-          <img src="https://via.placeholder.com/250x180/03a9f4/ffffff?text=Soap" class="card-img-top" alt="Soap">
-          <div class="card-body text-center">
-            <h5 class="card-title">🧼 Aloe Vera Soap</h5>
-            <p class="card-text">Price: ₹149</p>
-            <a href="#" class="btn btn-add">➕ Add to Cart</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product 3 -->
-      <div class="col-md-4 col-sm-6">
-        <div class="card">
-          <img src="https://via.placeholder.com/250x180/9c27b0/ffffff?text=Shampoo" class="card-img-top" alt="Shampoo">
-          <div class="card-body text-center">
-            <h5 class="card-title">🧴 Herbal Shampoo</h5>
-            <p class="card-text">Price: ₹299</p>
-            <a href="#" class="btn btn-add">➕ Add to Cart</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product 4 -->
-      <div class="col-md-4 col-sm-6">
-        <div class="card">
-          <img src="https://via.placeholder.com/250x180/ff4081/ffffff?text=Face+Cream" class="card-img-top" alt="Face Cream">
-          <div class="card-body text-center">
-            <h5 class="card-title">💆‍♀️ Face Cream</h5>
-            <p class="card-text">Price: ₹499</p>
-            <a href="#" class="btn btn-add">➕ Add to Cart</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product 5 -->
-      <div class="col-md-4 col-sm-6">
-        <div class="card">
-          <img src="https://via.placeholder.com/250x180/00bcd4/ffffff?text=Body+Lotion" class="card-img-top" alt="Body Lotion">
-          <div class="card-body text-center">
-            <h5 class="card-title">🧴 Body Lotion</h5>
-            <p class="card-text">Price: ₹599</p>
-            <a href="#" class="btn btn-add">➕ Add to Cart</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product 6 -->
-      <div class="col-md-4 col-sm-6">
-        <div class="card">
-          <img src="https://via.placeholder.com/250x180/8e24aa/ffffff?text=Hair+Oil" class="card-img-top" alt="Hair Oil">
-          <div class="card-body text-center">
-            <h5 class="card-title">💆‍♂️ Hair Oil</h5>
-            <p class="card-text">Price: ₹349</p>
-            <a href="#" class="btn btn-add">➕ Add to Cart</a>
-          </div>
-        </div>
-      </div>
+      {% endfor %}
     </div>
+    {% else %}
+    <div class="text-center mt-5">
+      <h4>😔 No products available right now.</h4>
+      <p>Please check back later!</p>
+    </div>
+    {% endif %}
   </div>
 </body>
 </html>

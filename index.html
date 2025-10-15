@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WORMS Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ===== General ===== */
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      color: #f1f1f1;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top left, #0a0a0f 0%, #12121a 40%, #1e1e2f 100%);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ===== Neon Blobs for Texture ===== */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.3;
+      animation: float 10s infinite ease-in-out alternate;
+    }
+
+    .blob1 { width: 400px; height: 400px; background: #6a5acd; top: -100px; left: -100px; animation-delay: 0s; }
+    .blob2 { width: 350px; height: 350px; background: #00bcd4; bottom: -120px; right: -80px; animation-delay: 2s; }
+    .blob3 { width: 300px; height: 300px; background: #ff4081; top: 40%; left: 65%; animation-delay: 4s; }
+
+    @keyframes float {
+      from { transform: translateY(0px) scale(1); }
+      to { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* ===== Container ===== */
+    .container {
+      position: relative;
+      text-align: center;
+      z-index: 10;
+      width: 90%;
+      max-width: 1000px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 600;
+      background: linear-gradient(90deg, #9c27b0, #03a9f4, #e91e63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 50px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+
+    /* ===== Cards ===== */
+    .card-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .role-card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 25px;
+      width: 270px;
+      padding: 30px 20px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+      transition: all 0.3s ease;
+    }
+
+    .role-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 0 20px rgba(0,255,255,0.3);
+    }
+
+    .role-card h3 {
+      font-weight: 600;
+      margin-top: 15px;
+      font-size: 1.3rem;
+      color: #fff;
+    }
+
+    .role-card p {
+      font-size: 0.9rem;
+      color: #cfcfcf;
+      margin-bottom: 20px;
+    }
+
+    .icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    /* ===== Arrow Buttons ===== */
+    .arrow-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #03a9f4, #9c27b0);
+      border: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .arrow-btn:hover {
+      transform: scale(1.1) rotate(10deg);
+      box-shadow: 0 0 20px rgba(156,39,176,0.8);
+    }
+
+    /* ===== Illustration ===== */
+    .background-graphic {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 400px;
+      opacity: 0.2;
+      z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+      .background-graphic { display: none; }
+      h1 { font-size: 2.2rem; }
+      .role-card { width: 90%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- background blobs -->
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+
+  <div class="container">
+    <h1>WORMS</h1>
+
+    <div class="card-container">
+      <div class="role-card">
+        <div class="icon">🛍️</div>
+        <h3>Customer</h3>
+        <p>Browse products, add to cart, and place your orders.</p>
+        <a href="{{ url_for('catalog') }}">
+          <button class="arrow-btn">➜</button>
+        </a>
+      </div>
+
+      <div class="role-card">
+        <div class="icon">🏭</div>
+        <h3>Supplier</h3>
+        <p>Manage inventory, track deliveries, and restock items.</p>
+        <a href="{{ url_for('supplier_login') }}">
+          <button class="arrow-btn">➜</button>
+        </a>
+      </div>
+
+      <div class="role-card">
+        <div class="icon">🏢</div>
+        <h3>Warehouse</h3>
+        <p>Monitor storage, update shipments, and handle orders.</p>
+        <a href="{{ url_for('warehouse_login') }}">
+          <button class="arrow-btn">➜</button>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

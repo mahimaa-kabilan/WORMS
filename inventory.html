@@ -1,242 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ warehouse_name }} | Inventory | WORMS</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warehouse Inventory | WORMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* ===== General ===== */
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
       color: #fff;
+      background: radial-gradient(circle at top left, #0a0a0f 0%, #12121a 40%, #1e1e2f 100%);
       min-height: 100vh;
-      background: radial-gradient(circle at top left, #1b1b29 0%, #24243a 40%, #302b63 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 10px;
       position: relative;
       overflow-x: hidden;
     }
 
-    /* ===== Background Blobs ===== */
-    .blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(100px);
-      opacity: 0.25;
-      animation: float 10s infinite ease-in-out alternate;
-      z-index: 0;
-    }
-    .blob1 { width: 350px; height: 350px; background: #6a5acd; top: -80px; left: -80px; animation-delay: 0s; }
-    .blob2 { width: 300px; height: 300px; background: #00bcd4; bottom: -80px; right: -60px; animation-delay: 2s; }
-    .blob3 { width: 250px; height: 250px; background: #ff4081; top: 60%; left: 70%; animation-delay: 4s; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.35; animation: float 10s infinite ease-in-out alternate; }
+    .blob1 { width: 400px; height: 400px; background: #6a5acd; top: -100px; left: -100px; }
+    .blob2 { width: 350px; height: 350px; background: #00bcd4; bottom: -120px; right: -80px; }
+    .blob3 { width: 300px; height: 300px; background: #ff4081; top: 40%; left: 70%; }
+    @keyframes float { from { transform: translateY(0px); } to { transform: translateY(-25px); } }
 
-    @keyframes float {
-      from { transform: translateY(0px) scale(1); }
-      to { transform: translateY(-30px) scale(1.05); }
+    .content-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 18px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      padding: 2rem;
+      width: 95%;
+      max-width: 1000px;
+      z-index: 5;
     }
 
-    /* ===== Header ===== */
-    .inventory-header {
+    h2 {
       text-align: center;
-      padding: 60px 20px 30px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .inventory-header h1 {
-      font-size: 2.8rem;
       font-weight: 600;
-      background: linear-gradient(90deg, #03a9f4, #9c27b0, #ff4081);
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, #03a9f4, #9c27b0, #e91e63);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 10px rgba(255,255,255,0.15);
-    }
-
-    .inventory-header p {
-      color: #bfbfd6;
-      margin-top: 10px;
-      font-size: 1.1rem;
-    }
-
-    /* ===== Search Bar ===== */
-    .search-container {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 20px;
-    }
-
-    .search-bar {
-      width: 300px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      border-radius: 30px;
-      padding: 10px 20px;
-      outline: none;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
-    }
-
-    .search-bar:focus {
-      width: 400px;
-      border-color: #03a9f4;
-      box-shadow: 0 0 20px rgba(3,169,244,0.4);
-    }
-
-    /* ===== Table Section ===== */
-    .inventory-table {
-      z-index: 2;
-      position: relative;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(12px);
-      border-radius: 16px;
-      margin: 30px auto;
-      width: 90%;
-      max-width: 1100px;
-      padding: 20px 30px;
-      box-shadow: 0 0 25px rgba(0,0,0,0.4);
-      transition: all 0.3s ease-in-out;
     }
 
     table {
-      color: #fff;
-      border-collapse: separate;
-      border-spacing: 0 10px;
       width: 100%;
-    }
-
-    thead {
-      background: linear-gradient(90deg, #03a9f4 0%, #9c27b0 100%);
-      border-radius: 12px;
-    }
-
-    thead th {
       color: #fff;
-      font-weight: 600;
-      text-align: center;
-      padding: 15px;
+      border-collapse: collapse;
+      margin-top: 20px;
     }
+    th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.2); text-align: center; }
+    th { color: #03a9f4; }
 
-    tbody tr {
-      background: rgba(255,255,255,0.08);
-      border-radius: 10px;
-      transition: all 0.25s ease;
+    .btn {
+      background: linear-gradient(135deg, #03a9f4, #9c27b0);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      transition: 0.3s;
+      text-decoration: none;
     }
-
-    tbody tr:hover {
-      background: rgba(255,255,255,0.15);
-      transform: translateY(-3px);
-    }
-
-    tbody td {
-      text-align: center;
-      padding: 12px;
-      color: #e3e3e3;
-      font-size: 0.95rem;
-    }
-
-    .status {
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-    .status.in-stock { background-color: rgba(0, 200, 83, 0.2); color: #00c853; }
-    .status.low-stock { background-color: rgba(255, 160, 0, 0.2); color: #ffa000; }
-    .status.out-of-stock { background-color: rgba(255, 23, 68, 0.2); color: #ff1744; }
-
-    .action-icons {
-      font-size: 1.2rem;
-      cursor: pointer;
-      margin: 0 8px;
-      transition: color 0.2s;
-    }
-    .action-icons:hover { color: #03a9f4; }
-
-    /* ===== Responsive ===== */
-    @media (max-width: 768px) {
-      table { font-size: 0.8rem; }
-      .inventory-header h1 { font-size: 2rem; }
-      .search-bar { width: 90%; }
-    }
+    .btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(156,39,176,0.6); }
   </style>
 </head>
 <body>
-  <!-- Background Blobs -->
   <div class="blob blob1"></div>
   <div class="blob blob2"></div>
   <div class="blob blob3"></div>
 
-  <!-- Header -->
-  <div class="inventory-header">
-    <h1>🏭 {{ warehouse_name }}</h1>
-    <p>📦 Inventory Dashboard — Manage stock and monitor product availability</p>
+  <div class="content-card">
+    <h2>🏬 Warehouse Inventory</h2>
+    <p class="text-center mb-3">Products with supplier details and stock levels 📦</p>
 
-    <div class="search-container">
-      <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Search by name, ID, or category">
-    </div>
-
-    <a href="{{ url_for('add_product', warehouse_name=warehouse_name) }}" class="btn btn-primary mt-3">➕ Add Product</a>
-  </div>
-
-  <!-- Inventory Table -->
-  <div class="inventory-table">
-    <table id="inventoryTable">
+    <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Product</th>
-          <th>Category</th>
-          <th>Stock</th>
-          <th>Status</th>
-          <th>Actions</th>
+          <th>Product ID</th>
+          <th>Product Name</th>
+          <th>Supplier Name</th>
+          <th>Quantity</th>
+          <th>Last Updated</th>
         </tr>
       </thead>
       <tbody>
-        {% for product in products %}
+        {% for item in inventory %}
         <tr>
-          <td>{{ product.id }}</td>
-          <td>{{ product.name }}</td>
-          <td>{{ product.category }}</td>
-          <td>{{ product.stock }}</td>
-          <td>
-            {% if product.stock > 50 %}
-              <span class="status in-stock">In Stock</span>
-            {% elif product.stock > 0 %}
-              <span class="status low-stock">Low Stock</span>
-            {% else %}
-              <span class="status out-of-stock">Out of Stock</span>
-            {% endif %}
-          </td>
-          <td>
-            <a href="{{ url_for('edit_product', product_id=product.id) }}" class="action-icons">✏️</a>
-            <a href="{{ url_for('delete_product', product_id=product.id) }}" class="action-icons">🗑️</a>
-          </td>
+          <td>{{ item.productID }}</td>
+          <td>{{ item.product_name }}</td>
+          <td>{{ item.firstname }} {{ item.lastname }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.lastUpdate }}</td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="6" class="text-center text-muted py-3">😔 No products available in this warehouse.</td>
+          <td colspan="5" class="text-center text-muted">No products found 🥺</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+
+    <div class="text-center mt-4">
+      <a href="{{ url_for('warehouse_dashboard') }}" class="btn">⬅️ Back to Dashboard</a>
+    </div>
   </div>
-
-  <script>
-    // Live Search + Animation
-    const searchInput = document.getElementById('searchInput');
-    const rows = document.querySelectorAll('#inventoryTable tbody tr');
-
-    searchInput.addEventListener('input', () => {
-      const query = searchInput.value.toLowerCase().trim();
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? '' : 'none';
-      });
-    });
-  </script>
 </body>
 </html>

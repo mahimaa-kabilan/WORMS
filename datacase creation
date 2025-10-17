@@ -11,8 +11,8 @@ CREATE TABLE Customers (
     customerID INT PRIMARY KEY AUTO_INCREMENT,
     firstname VARCHAR(50),
     lastname VARCHAR(50),
-    phone VARCHAR(10),
-    email VARCHAR(100),
+    phone VARCHAR(10) UNIQUE,
+    email VARCHAR(100) UNIQUE,
     doorno VARCHAR(10),
     street VARCHAR(50),
     district VARCHAR(50),
@@ -27,8 +27,8 @@ CREATE TABLE Supplier (
     supplierID INT PRIMARY KEY AUTO_INCREMENT,
     firstname VARCHAR(50),
     lastname VARCHAR(50),
-    phone VARCHAR(10),
-    email VARCHAR(100),
+    phone VARCHAR(10) UNIQUE,
+    email VARCHAR(100) UNIQUE,
     doorno VARCHAR(10),
     street VARCHAR(50),
     district VARCHAR(50),
@@ -44,22 +44,9 @@ CREATE TABLE Product (
     name VARCHAR(50),
     description VARCHAR(225),
     unitPrice DECIMAL(10,2),
-    image_url VARCHAR(225)
-);
-
--- =========================================
--- TABLE: PURCHASE ORDER
--- =========================================
-CREATE TABLE PurchaseOrder (
-    purchaseOrderID INT PRIMARY KEY AUTO_INCREMENT,
-    productID INT,
-    supplierID INT,
-    orderDate DATE,
-    totalAmount DECIMAL(10,2),
-    quantity INT,
-    status VARCHAR(50),
-    FOREIGN KEY (productID) REFERENCES Product(productID),
-    FOREIGN KEY (supplierID) REFERENCES Supplier(supplierID)
+    image_url VARCHAR(225),
+    supplierID INT
+    FOREIGN KEY (supplierID) REFERENCES Supplier(supplierID);
 );
 
 -- =========================================
@@ -69,7 +56,8 @@ CREATE TABLE Warehouse (
     warehouseID INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50),
     location VARCHAR(50),
-    capacity INT
+    capacity INT,
+    email VARCHAR(100) UNIQUE
 );
 
 -- =========================================
@@ -109,20 +97,6 @@ CREATE TABLE OrderLine (
     PRIMARY KEY (orderID, productID),
     FOREIGN KEY (orderID) REFERENCES Orders(orderID),
     FOREIGN KEY (productID) REFERENCES Product(productID)
-);
-
--- =========================================
--- TABLE: SHIPMENT
--- =========================================
-CREATE TABLE Shipment (
-    shipmentID INT PRIMARY KEY AUTO_INCREMENT,
-    orderID INT,
-    warehouseID INT,
-    shipmentDate DATE,
-    trackingNumber VARCHAR(20),
-    status VARCHAR(20),
-    FOREIGN KEY (orderID) REFERENCES Orders(orderID),
-    FOREIGN KEY (warehouseID) REFERENCES Warehouse(warehouseID)
 );
 
 -- =========================================

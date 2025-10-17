@@ -48,6 +48,19 @@
       transition: 0.3s;
     }
     button.btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 12px rgba(0,150,255,0.5); }
+
+    .btn-back {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      font-weight: 600;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #03a9f4, #546bff);
+      transition: 0.3s;
+    }
+    .btn-back:hover { transform: scale(1.05); box-shadow: 0 0 12px rgba(0,150,255,0.5); }
   </style>
 </head>
 <body>
@@ -63,6 +76,9 @@
       </div>
       <button type="submit" class="btn btn-primary">💾 Save Changes</button>
     </form>
+
+    <!-- Back to Dashboard -->
+    <a href="{{ url_for('warehouse_dashboard') }}" class="btn-back">⬅️ Back to Dashboard</a>
   </div>
 </body>
 </html>

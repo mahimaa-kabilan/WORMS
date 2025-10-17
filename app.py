@@ -21,11 +21,48 @@ def index():
 def catalog():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Product")
+
+    # Get search term (if any)
+    search_query = request.args.get('search', '').strip()
+
+    # Fetch products (filtered if a search is performed)
+    if search_query:
+        query = """
+            SELECT p.*, i.quantity AS stock_quantity 
+            FROM Product p
+            LEFT JOIN Inventory i ON p.productID = i.productID
+            WHERE p.productName LIKE %s OR p.description LIKE %s
+        """
+        cursor.execute(query, (f"%{search_query}%", f"%{search_query}%"))
+    else:
+        cursor.execute("""
+            SELECT p.*, i.quantity AS stock_quantity
+            FROM Product p
+            LEFT JOIN Inventory i ON p.productID = i.productID
+        """)
+
     products = cursor.fetchall()
+
+    # Handle cart items if user is logged in
+    if 'user_id' in session and session.get('role') == 'customer':
+        cursor.execute("SELECT productID, quantity FROM Cart WHERE customerID=%s", (session['entityId'],))
+        cart_items = cursor.fetchall()
+        cart_map = {item['productID']: item['quantity'] for item in cart_items}
+        for p in products:
+            if p['productID'] in cart_map:
+                p['in_cart'] = True
+                p['quantity'] = cart_map[p['productID']]
+            else:
+                p['in_cart'] = False
+    else:
+        for p in products:
+            p['in_cart'] = False
+
     cursor.close()
     conn.close()
-    return render_template('customer/catalog.html', products=products)
+
+    return render_template('customer/catalog.html', products=products, search_query=search_query)
+
 
 @app.route('/customer/signup', methods=['GET', 'POST'])
 def customer_signup():
@@ -92,13 +129,16 @@ def customer_login():
 
     return render_template('customer/login.html')
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return redirect(url_for('catalog'))
+
 @app.route('/cart/add/<int:product_id>', methods=['GET', 'POST'])
 @login_required(role='customer')
 def add_to_cart(product_id):
     conn = get_db_connection()
     cursor = conn.cursor()
-
-    # Always add 1 quantity when accessed
     cursor.execute("""
         INSERT INTO Cart (customerID, productID, quantity)
         VALUES (%s, %s, %s)
@@ -107,7 +147,7 @@ def add_to_cart(product_id):
     conn.commit()
     cursor.close()
     conn.close()
-    return redirect(url_for('view_cart'))
+    return redirect(url_for('catalog', added=product_id))
 
 
 @app.route('/cart/view')
@@ -116,7 +156,7 @@ def view_cart():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        SELECT c.cartID, p.name, p.unitPrice, c.quantity, (p.unitPrice * c.quantity) AS totalPrice
+        SELECT c.cartID, p.name, p.unitPrice, c.quantity, p.image_url, (p.unitPrice * c.quantity) AS totalPrice
         FROM Cart c
         JOIN Product p ON c.productID = p.productID
         WHERE c.customerID = %s
@@ -126,14 +166,145 @@ def view_cart():
     conn.close()
     return render_template('customer/cart.html', cart=cart_items)
 
+@app.route('/cart/increase/<int:product_id>')
+@login_required(role='customer')
+def increase_cart(product_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE Cart SET quantity = quantity + 1
+        WHERE customerID = %s AND productID = %s
+    """, (session['entityId'], product_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('catalog'))
+
+@app.route('/decrease_cart/<int:product_id>')
+def decrease_cart(product_id):
+    if 'user_id' not in session or session.get('role') != 'customer':
+        return redirect(url_for('customer_login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    customer_id = session['entityId']
+
+    # Fetch current quantity in cart
+    cursor.execute("SELECT quantity FROM Cart WHERE customerID=%s AND productID=%s", (customer_id, product_id))
+    item = cursor.fetchone()
+
+    if item:
+        if item['quantity'] > 1:
+            # Reduce quantity by 1
+            cursor.execute(
+                "UPDATE Cart SET quantity = quantity - 1 WHERE customerID=%s AND productID=%s",
+                (customer_id, product_id)
+            )
+        else:
+            # Quantity will become 0 → remove the item from cart
+            cursor.execute(
+                "DELETE FROM Cart WHERE customerID=%s AND productID=%s",
+                (customer_id, product_id)
+            )
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for('catalog'))
+
+
+@app.route('/cart/remove/<int:product_id>')
+@login_required(role='customer')
+def remove_from_cart(product_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        DELETE FROM Cart WHERE customerID = %s AND productID = %s
+    """, (session['entityId'], product_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('catalog'))
+
+from datetime import date
+
+@app.route('/cart/place_order', methods=['POST'])
+@login_required(role='customer')
+def place_order():
+    customer_id = session['entityId']
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Fetch all items in cart for this customer
+    cursor.execute("""
+        SELECT c.productID, c.quantity, p.unitPrice
+        FROM Cart c
+        JOIN Product p ON c.productID = p.productID
+        WHERE c.customerID = %s
+    """, (customer_id,))
+    cart_items = cursor.fetchall()
+
+    if not cart_items:
+        cursor.close()
+        conn.close()
+        return redirect(url_for('view_cart'))
+
+    # Calculate total amount
+    total_amount = sum(item['quantity'] * item['unitPrice'] for item in cart_items)
+
+    # Insert into Orders table
+    cursor.execute("""
+        INSERT INTO Orders (customerID, orderDate, totalAmount, status)
+        VALUES (%s, %s, %s, %s)
+    """, (customer_id, date.today(), total_amount, 'Pending'))
+    conn.commit()
+    order_id = cursor.lastrowid
+
+    # Insert each product into OrderLine table
+    for item in cart_items:
+        cursor.execute("""
+            INSERT INTO OrderLine (orderID, productID, quantity, totalPrice)
+            VALUES (%s, %s, %s, %s)
+        """, (
+            order_id,
+            item['productID'],
+            item['quantity'],
+            item['unitPrice'] * item['quantity']
+        ))
+
+    # Empty the cart
+    cursor.execute("DELETE FROM Cart WHERE customerID = %s", (customer_id,))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return redirect(url_for('view_orders'))
+
 @app.route('/orders')
 @login_required(role='customer')
 def view_orders():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
+    
+    # Join Orders, OrderLine, and Product to show detailed info
     cursor.execute("""
-        SELECT * FROM Orders WHERE customerID = %s
+        SELECT 
+            o.orderID AS id,
+            p.name AS product_name,
+            o.orderDate AS date,
+            ol.quantity,
+            ol.totalPrice AS total,
+            o.status
+        FROM Orders o
+        JOIN OrderLine ol ON o.orderID = ol.orderID
+        JOIN Product p ON ol.productID = p.productID
+        WHERE o.customerID = %s
+        ORDER BY o.orderDate DESC;
     """, (session['entityId'],))
+    
     orders = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -208,9 +379,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # ROUTE: ADD PRODUCT (GET + POST)
 # ===========================
 @app.route('/add_product', methods=['GET', 'POST'])
+@login_required(role='supplier')  # make sure only suppliers can add products
 def add_product():
     conn = get_db_connection()
-    cursor=conn.cursor(dictionary=True)
+    cursor = conn.cursor(dictionary=True)
+
     # Fetch available warehouses for dropdown
     cursor.execute("SELECT warehouseID, name FROM Warehouse")
     warehouses = cursor.fetchall()
@@ -223,18 +396,21 @@ def add_product():
         warehouse_id = request.form['warehouse_id']
         image = request.files['image']
 
+        # Get supplierID from session (assuming supplier is logged in)
+        supplier_id = session.get('entityId')  # matches your Users table mapping
+
         image_path = None
         if image and image.filename != '':
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
             image.save(image_path)
             image_path = image_path.replace('\\', '/')
 
-        # Insert product
+        # Insert product with supplierID
         insert_product = """
-        INSERT INTO Product (name, description, unitPrice, image_url)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO Product (name, description, unitPrice, image_url, supplierID)
+        VALUES (%s, %s, %s, %s, %s)
         """
-        cursor.execute(insert_product, (name, description, unitPrice, image_path))
+        cursor.execute(insert_product, (name, description, unitPrice, image_path, supplier_id))
         conn.commit()
 
         # Get product ID
@@ -263,6 +439,7 @@ def add_product():
         return redirect(url_for('add_product'))
 
     return render_template('supplier/add_product.html', warehouses=warehouses)
+
 
 
 @app.route('/supplier/stock_view')
@@ -301,21 +478,33 @@ def supplier_stock_alert():
     return render_template('supplier/stock_alert.html', alerts=low_stock)
 
 
-@app.route('/supplier/purchase_orders')
-@login_required(role='supplier')
+@app.route('/purchase_orders')
 def supplier_purchase_orders():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
+
+    # Fetch only SUCCESSFUL orders for this supplier
+    # Join orders -> orderline -> product
     cursor.execute("""
-        SELECT po.purchaseOrderID, p.name, po.orderDate, po.totalAmount, po.quantity, po.status
-        FROM PurchaseOrder po
-        JOIN Product p ON po.productID = p.productID
-        WHERE po.supplierID = %s
+        SELECT o.orderID, p.name AS product, ol.quantity, ol.totalPrice AS totalAmount,
+       o.status, i.warehouseID, w.name AS warehouse
+FROM orders o
+JOIN orderline ol ON o.orderID = ol.orderID
+JOIN product p ON ol.productID = p.productID
+JOIN inventory i ON p.productID = i.productID
+JOIN Warehouse w ON i.warehouseID = w.warehouseID
+WHERE o.status = 'Success' AND p.supplierID = %s
+
     """, (session['entityId'],))
+    
     orders = cursor.fetchall()
+
     cursor.close()
     conn.close()
+
     return render_template('supplier/purchase_orders.html', orders=orders)
+
+
 
 
 # ==========================================================
@@ -330,9 +519,9 @@ def warehouse_signup():
         cursor = conn.cursor()
 
         cursor.execute("""
-            INSERT INTO Warehouse (name, location, capacity)
-            VALUES (%s, %s, %s)
-        """, (data['name'], data['location'], data['capacity']))
+            INSERT INTO Warehouse (name, location, capacity,email)
+            VALUES (%s, %s, %s, %s)
+        """, (data['name'], data['location'], data['capacity'], data['email']))
         conn.commit()
         warehouse_id = cursor.lastrowid
 
@@ -378,54 +567,99 @@ def warehouse_dashboard():
 # ==========================================================
 # WAREHOUSE FEATURES
 # ==========================================================
-
 @app.route('/warehouse/inventory')
 @login_required(role='warehouse')
 def warehouse_inventory():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
+    
     cursor.execute("""
-        SELECT p.name, i.quantity, i.lastUpdate
+        SELECT 
+            p.productID,
+            p.name AS product_name,
+            s.firstname,
+            s.lastname,
+            i.quantity,
+            i.lastUpdate
         FROM Inventory i
         JOIN Product p ON i.productID = p.productID
+        LEFT JOIN Supplier s ON p.supplierID = s.supplierID
         WHERE i.warehouseID = %s
+        ORDER BY p.productID;
     """, (session['entityId'],))
+    
     inventory = cursor.fetchall()
     cursor.close()
     conn.close()
     return render_template('warehouse/inventory.html', inventory=inventory)
 
-
+# Display orders eligible for this warehouse
 @app.route('/warehouse/orders')
-@login_required(role='warehouse')
 def warehouse_orders():
+    warehouse_id = session.get('entityId')
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
+
+    # Show only pending orders where warehouse has enough stock
     cursor.execute("""
-        SELECT s.shipmentID, s.trackingNumber, s.status, o.orderID, o.orderDate, o.deliveryDate
-        FROM Shipment s
-        JOIN Orders o ON s.orderID = o.orderID
-        WHERE s.warehouseID = %s
-    """, (session['entityId'],))
+        SELECT o.orderID, c.firstname, c.lastname, p.name, ol.quantity AS order_quantity,
+               o.status, o.deliveryDate, p.productID
+        FROM Orders o
+        JOIN OrderLine ol ON o.orderID = ol.orderID
+        JOIN Product p ON ol.productID = p.productID
+        JOIN Customers c ON o.customerID = c.customerID
+        JOIN Inventory i ON i.productID = p.productID
+        WHERE o.status = 'Pending'
+          AND i.warehouseID = %s
+          AND i.quantity >= ol.quantity
+    """, (warehouse_id,))
     orders = cursor.fetchall()
+
     cursor.close()
     conn.close()
+
     return render_template('warehouse/orders.html', orders=orders)
 
 
-@app.route('/warehouse/update_status/<int:shipment_id>', methods=['POST'])
-@login_required(role='warehouse')
-def update_shipment_status(shipment_id):
-    new_status = request.form['status']
+# Update order status and delivery date
+@app.route('/warehouse/update_order', methods=['POST'])
+def update_order():
+    order_id = request.form.get('order_id')
+    warehouse_id = session.get('entityId')
+
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
+
+    # Mark order as success
     cursor.execute("""
-        UPDATE Shipment SET status=%s WHERE shipmentID=%s
-    """, (new_status, shipment_id))
+        UPDATE Orders
+        SET status = 'Success'
+        WHERE orderID = %s
+    """, (order_id,))
+
+    # Fetch order line for quantity deduction
+    cursor.execute("""
+        SELECT ol.productID, ol.quantity
+        FROM OrderLine ol
+        WHERE ol.orderID = %s
+    """, (order_id,))
+    items = cursor.fetchall()
+
+    # Update inventory
+    for item in items:
+        cursor.execute("""
+            UPDATE Inventory
+            SET quantity = quantity - %s
+            WHERE productID = %s AND warehouseID = %s
+        """, (item['quantity'], item['productID'], warehouse_id))
+
     conn.commit()
     cursor.close()
     conn.close()
+
     return redirect(url_for('warehouse_orders'))
+
 
 
 @app.route('/warehouse/stock_alert')

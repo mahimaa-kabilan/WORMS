@@ -7,7 +7,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    /* ===== General ===== */
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
@@ -15,11 +14,10 @@
       background: radial-gradient(circle at top left, #0a0a0f 0%, #12121a 40%, #1e1e2f 100%);
       overflow-x: hidden;
       position: relative;
-      padding-top: 90px; /* Prevent overlap with fixed navbar */
+      padding-top: 120px;
       min-height: 100vh;
     }
 
-    /* ===== Neon Blobs ===== */
     .blob {
       position: absolute;
       border-radius: 50%;
@@ -28,26 +26,19 @@
       animation: float 10s infinite ease-in-out alternate;
       z-index: 0;
     }
-
     .blob1 { width: 400px; height: 400px; background: #6a5acd; top: -100px; left: -100px; animation-delay: 0s; }
     .blob2 { width: 350px; height: 350px; background: #00bcd4; bottom: -120px; right: -80px; animation-delay: 2s; }
     .blob3 { width: 300px; height: 300px; background: #ff4081; top: 40%; left: 65%; animation-delay: 4s; }
+    @keyframes float { from { transform: translateY(0px) scale(1); } to { transform: translateY(-30px) scale(1.05); } }
 
-    @keyframes float {
-      from { transform: translateY(0px) scale(1); }
-      to { transform: translateY(-30px) scale(1.05); }
-    }
-
-    /* ===== Navbar ===== */
     .navbar {
       backdrop-filter: blur(12px);
-      background: rgba(255, 255, 255, 0.08);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       padding: 1rem 2rem;
       z-index: 10;
     }
-
     .navbar-brand {
       font-size: 1.5rem;
       font-weight: 600;
@@ -55,7 +46,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-
     .nav-btn {
       margin-left: 10px;
       border: none;
@@ -67,66 +57,63 @@
       transition: 0.3s ease;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
-
     .nav-btn:hover {
       transform: scale(1.05);
       box-shadow: 0 0 15px rgba(156,39,176,0.8);
     }
 
-    /* ===== Catalog ===== */
+    /* Search Bar */
+    .search-bar {
+      max-width: 400px;
+      margin: 1rem auto 2rem;
+      text-align: center;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 10px 15px;
+      border-radius: 20px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .search-bar input::placeholder { color: #ddd; }
+
     .container {
       position: relative;
       z-index: 5;
-      padding: 60px 1rem 80px;
+      padding: 20px 1rem 80px;
       max-width: 1200px;
     }
-
     h2 {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
       background: linear-gradient(90deg, #9c27b0, #03a9f4, #e91e63);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       font-weight: 600;
     }
-
-    .row {
-      justify-content: center;
-    }
-
+    .row { justify-content: center; }
     .card {
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255,255,255,0.08);
       backdrop-filter: blur(10px);
       border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.1);
       box-shadow: 0 6px 20px rgba(0,0,0,0.3);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       height: 100%;
     }
-
     .card:hover {
       transform: translateY(-5px);
       box-shadow: 0 0 20px rgba(0,255,255,0.2);
     }
-
     .card-img-top {
       border-top-left-radius: 20px;
       border-top-right-radius: 20px;
       height: 180px;
       object-fit: cover;
     }
-
-    .card-title {
-      font-size: 1rem;
-      color: #fff;
-      margin-bottom: 0.5rem;
-    }
-
-    .card-text {
-      color: #cfcfcf;
-      font-size: 0.9rem;
-    }
-
+    .card-title { font-size: 1rem; color: #fff; margin-bottom: 0.5rem; }
+    .card-text { color: #cfcfcf; font-size: 0.9rem; }
     .btn-add {
       background: linear-gradient(135deg, #03a9f4, #9c27b0);
       border: none;
@@ -135,12 +122,13 @@
       color: white;
       transition: 0.3s ease;
     }
-
     .btn-add:hover {
       transform: scale(1.05);
       box-shadow: 0 0 15px rgba(156,39,176,0.8);
     }
-
+    .quantity-text { color: #e0e0e0; font-weight: 600; }
+    .out-of-stock { color: red; font-weight: bold; }
+    .no-results { text-align: center; color: #bbb; font-size: 1.2rem; margin-top: 2rem; display: none; }
   </style>
 </head>
 <body>
@@ -154,33 +142,77 @@
     <div class="container-fluid">
       <a class="navbar-brand" href="{{ url_for('catalog') }}">WORMS</a>
       <div class="ms-auto">
-        <a href="{{ url_for('customer_signup') }}"><button class="nav-btn">📝 Sign Up</button></a>
-        <a href="{{ url_for('customer_login') }}"><button class="nav-btn">🔑 Login</button></a>
-        <a href="{{ url_for('view_cart') }}"><button class="nav-btn">🛒 Cart</button></a>
-        <a href="{{ url_for('view_orders') }}"><button class="nav-btn">📦 Orders</button></a>
+        <a href="{{ url_for('index') }}"><button class="nav-btn">🏠 Home</button></a>
+        {% if 'user_id' not in session %}
+          <a href="{{ url_for('customer_signup') }}"><button class="nav-btn">📝 Sign Up</button></a>
+          <a href="{{ url_for('customer_login') }}"><button class="nav-btn">🔑 Login</button></a>
+        {% else %}
+          <a href="{{ url_for('view_cart') }}"><button class="nav-btn">🛒 Cart</button></a>
+          <a href="{{ url_for('view_orders') }}"><button class="nav-btn">📦 Orders</button></a>
+          <form action="{{ url_for('logout') }}" method="post" style="display:inline;">
+            <button class="nav-btn" type="submit">🚪 Logout</button>
+          </form>
+        {% endif %}
       </div>
     </div>
   </nav>
 
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search products..." onkeyup="filterProducts()">
+  </div>
+
   <!-- Catalog Section -->
   <div class="container">
     <h2>🛍️ Product Catalog</h2>
-    <div class="row g-4">
+    <div class="row g-4" id="productList">
       {% for product in products %}
-      <div class="col-lg-4 col-md-6 col-sm-12">
-        <div class="card h-100 text-center">
-  <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
-  <div class="card-body">
-    <h5 class="card-title">{{ product.name }}</h5>
-    <p class="card-text">Price: ₹{{ product.unitPrice }}</p>
-    <a href="{{ url_for('add_to_cart', product_id=product.productID) }}" class="btn btn-add">➕ Add to Cart</a>
-  </div>
-</div>
+        <div class="col-lg-4 col-md-6 col-sm-12 product-card">
+          <div class="card h-100 text-center">
+            <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+            <div class="card-body">
+              <h5 class="card-title">{{ product.name }}</h5>
+              <p class="card-text">Price: ₹{{ product.unitPrice }}</p>
 
-      </div>
+              {% if product.stock_quantity == 0 %}
+                <p class="out-of-stock">❌ Out of stock</p>
+              {% elif product.in_cart %}
+                <div class="d-flex justify-content-center align-items-center">
+                  <a href="{{ url_for('decrease_cart', product_id=product.productID) }}" class="btn btn-add">➖</a>
+                  <span class="mx-3 quantity-text">{{ product.quantity }}</span>
+                  <a href="{{ url_for('increase_cart', product_id=product.productID) }}" class="btn btn-add">➕</a>
+                  <a href="{{ url_for('remove_from_cart', product_id=product.productID) }}" class="btn btn-danger ms-2">🗑️</a>
+                </div>
+              {% else %}
+                <a href="{{ url_for('add_to_cart', product_id=product.productID) }}" class="btn btn-add">➕ Add to Cart</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
       {% endfor %}
     </div>
+    <p id="noResults" class="no-results">No products found</p>
   </div>
 
+  <script>
+    function filterProducts() {
+      let input = document.getElementById("searchInput").value.toLowerCase();
+      let products = document.querySelectorAll("#productList .product-card");
+      let noResults = document.getElementById("noResults");
+      let found = false;
+
+      products.forEach(card => {
+        let title = card.querySelector(".card-title").textContent.toLowerCase();
+        if (title.includes(input)) {
+          card.style.display = "";
+          found = true;
+        } else {
+          card.style.display = "none";
+        }
+      });
+
+      noResults.style.display = found ? "none" : "block";
+    }
+  </script>
 </body>
 </html>

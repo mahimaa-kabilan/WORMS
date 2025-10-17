@@ -99,7 +99,7 @@
   <div class="blob blob3"></div>
 
   <div class="card">
-    <h3>Supplier Signup</h3>
+    <h3>Customer Signup</h3>
     <form method="POST" id="signupForm">
       <div class="row g-3">
         <div class="col-md-6">
@@ -116,7 +116,7 @@
         </div>
         <div class="col-md-6">
           <label>Phone</label>
-          <input type="text" name="phone" class="form-control" required>
+          <input type="text" name="phone" maxlength="10" pattern="[0-9]{10}" title="Enter a 10-digit phone number" required>
         </div>
         <div class="col-12">
           <label>Password</label>

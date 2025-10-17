@@ -18,10 +18,11 @@
       overflow-y: auto;
       position: relative;
     }
+
     .blob {
-    position: absolute;
-    pointer-events: none; /* allow scrolling/clicks on underlying content */
-}
+      position: absolute;
+      pointer-events: none; /* allow scrolling/clicks on underlying content */
+    }
 
     .form-card {
       width: 420px;
@@ -66,46 +67,50 @@
       display: none;
     }
 
-    .nav-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .nav-buttons a {
-      text-decoration: none;
+    .back-btn {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
       background: linear-gradient(135deg, #9c27b0, #03a9f4);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px;
+      font-weight: 600;
+      text-decoration: none;
       transition: 0.3s;
     }
 
-    .nav-buttons a:hover { transform: scale(1.05); }
+    .back-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(156, 39, 176, 0.4);
+      color: #fff;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
   <div class="form-card">
-
     <h2>Add Product</h2>
     <form method="POST" enctype="multipart/form-data">
       <input type="text" name="name" class="form-control mb-2" placeholder="Product Name" required>
       <textarea name="description" class="form-control mb-2" placeholder="Description" rows="3" required></textarea>
       <input type="number" name="unitPrice" class="form-control mb-2" placeholder="Unit Price" required>
       <input type="number" name="quantity" class="form-control mb-2" placeholder="Quantity" required>
+
       <select name="warehouse_id" class="form-control mb-2" required>
         <option value="">Select Warehouse</option>
-  {% for w in warehouses %}
-    <option value="{{ w.warehouseID }}">{{ w.name }}</option>
-  {% endfor %}
+        {% for w in warehouses %}
+          <option value="{{ w.warehouseID }}">{{ w.name }}</option>
+        {% endfor %}
       </select>
+
       <input type="file" name="image" class="form-control mb-2" accept="image/*" onchange="previewImage(event)">
       <img id="preview" class="preview">
       <button type="submit">Add Product</button>
     </form>
+
+    <!-- Back to Dashboard Button -->
+    <a href="{{ url_for('warehouse_dashboard') }}" class="back-btn">⬅️ Back to Dashboard</a>
   </div>
 
   <script>
@@ -117,3 +122,4 @@
   </script>
 </body>
 </html>
+

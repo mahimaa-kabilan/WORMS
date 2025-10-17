@@ -110,9 +110,13 @@
 
     <div>
       <a href="{{ url_for('warehouse_inventory') }}" class="btn btn-custom">📦 Inventory</a>
+      <a href="{{ url_for('warehouse_orders') }}" class="btn btn-custom">🧾 Orders</a>
       <a href="{{ url_for('edit_warehouse_capacity') }}" class="btn btn-custom">⚙️ Edit Capacity</a>
       <a href="{{ url_for('warehouse_stock_alert') }}" class="btn btn-custom">🚨 Stock Alerts</a>
     </div>
+    <div style="margin-top: 20px;">
+  <a href="{{ url_for('index') }}" class="btn btn-custom">🏠 Back to Home</a>
+</div>
   </div>
 </body>
 </html>

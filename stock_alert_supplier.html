@@ -40,6 +40,21 @@
       color: #dcdcff;
       font-weight: 600;
     }
+    .back-btn {
+      display: block;
+      width: fit-content;
+      margin: 20px auto 0 auto;
+      background: linear-gradient(135deg, #03a9f4, #9c27b0);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      text-align: center;
+      transition: 0.3s;
+    }
+    .back-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(156,39,176,0.6); }
   </style>
 </head>
 <body>
@@ -62,6 +77,9 @@
     {% else %}
       <p class="text-center">🎉 All stocks are healthy!</p>
     {% endif %}
+
+    <!-- Back to Dashboard Button -->
+    <a href="{{ url_for('supplier_dashboard') }}" class="back-btn">⬅️ Back to Dashboard</a>
   </div>
 </body>
 </html>
